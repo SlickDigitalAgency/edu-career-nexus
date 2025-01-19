@@ -1,9 +1,31 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { GraduationCap, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import type { User } from "@supabase/supabase-js";
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate("/");
+  };
 
   return (
     <nav className="bg-white shadow-sm">
@@ -15,11 +37,18 @@ export function Navigation() {
           </div>
           
           <div className="hidden md:flex items-center space-x-4">
-            <Button variant="ghost">Institutions</Button>
-            <Button variant="ghost">Internships</Button>
-            <Button variant="ghost">Community</Button>
-            <Button variant="ghost">About</Button>
-            <Button variant="default">Sign In</Button>
+            <Button variant="ghost" onClick={() => navigate("/institutions")}>Institutions</Button>
+            <Button variant="ghost" onClick={() => navigate("/internships")}>Internships</Button>
+            <Button variant="ghost" onClick={() => navigate("/community")}>Community</Button>
+            <Button variant="ghost" onClick={() => navigate("/about")}>About</Button>
+            {user ? (
+              <>
+                <Button variant="ghost" onClick={() => navigate("/dashboard")}>Dashboard</Button>
+                <Button variant="default" onClick={handleSignOut}>Sign Out</Button>
+              </>
+            ) : (
+              <Button variant="default" onClick={() => navigate("/auth")}>Sign In</Button>
+            )}
           </div>
 
           <div className="flex md:hidden items-center">
@@ -36,11 +65,18 @@ export function Navigation() {
       {isOpen && (
         <div className="md:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1">
-            <Button variant="ghost" className="w-full justify-start">Institutions</Button>
-            <Button variant="ghost" className="w-full justify-start">Internships</Button>
-            <Button variant="ghost" className="w-full justify-start">Community</Button>
-            <Button variant="ghost" className="w-full justify-start">About</Button>
-            <Button variant="default" className="w-full">Sign In</Button>
+            <Button variant="ghost" className="w-full justify-start" onClick={() => navigate("/institutions")}>Institutions</Button>
+            <Button variant="ghost" className="w-full justify-start" onClick={() => navigate("/internships")}>Internships</Button>
+            <Button variant="ghost" className="w-full justify-start" onClick={() => navigate("/community")}>Community</Button>
+            <Button variant="ghost" className="w-full justify-start" onClick={() => navigate("/about")}>About</Button>
+            {user ? (
+              <>
+                <Button variant="ghost" className="w-full justify-start" onClick={() => navigate("/dashboard")}>Dashboard</Button>
+                <Button variant="default" className="w-full" onClick={handleSignOut}>Sign Out</Button>
+              </>
+            ) : (
+              <Button variant="default" className="w-full" onClick={() => navigate("/auth")}>Sign In</Button>
+            )}
           </div>
         </div>
       )}
