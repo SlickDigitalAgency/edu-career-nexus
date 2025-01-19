@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 import type { Database } from "@/integrations/supabase/types";
 
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
@@ -12,6 +13,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     const checkUser = async () => {
@@ -22,14 +24,45 @@ export default function Dashboard() {
         return;
       }
 
-      const { data: profileData, error } = await supabase
+      // Try to get existing profile
+      const { data: profileData, error: profileError } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", session.user.id)
-        .single();
+        .maybeSingle();
 
-      if (error) {
-        console.error("Error fetching profile:", error);
+      if (profileError) {
+        console.error("Error fetching profile:", profileError);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to load profile data. Please try again later.",
+        });
+      } else if (!profileData) {
+        // Create new profile if none exists
+        const { data: newProfile, error: createError } = await supabase
+          .from("profiles")
+          .insert([
+            {
+              id: session.user.id,
+              full_name: session.user.user_metadata.full_name || null,
+              avatar_url: session.user.user_metadata.avatar_url || null,
+              user_type: "student", // Default user type
+            },
+          ])
+          .select()
+          .single();
+
+        if (createError) {
+          console.error("Error creating profile:", createError);
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Failed to create profile. Please try again later.",
+          });
+        } else {
+          setProfile(newProfile);
+        }
       } else {
         setProfile(profileData);
       }
@@ -38,7 +71,7 @@ export default function Dashboard() {
     };
 
     checkUser();
-  }, [navigate]);
+  }, [navigate, toast]);
 
   if (loading) {
     return (
