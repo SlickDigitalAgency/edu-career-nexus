@@ -26,8 +26,8 @@ const ITEMS_PER_PAGE = 9
 export default function Institutions() {
   const { toast } = useToast()
   const [search, setSearch] = useState("")
-  const [location, setLocation] = useState<string>("")
-  const [ranking, setRanking] = useState<string>("")
+  const [location, setLocation] = useState<string>("all")
+  const [ranking, setRanking] = useState<string>("all")
   const [page, setPage] = useState(1)
 
   const { data: institutions, isLoading } = useQuery({
@@ -41,10 +41,10 @@ export default function Institutions() {
       if (search) {
         query = query.ilike("name", `%${search}%`)
       }
-      if (location) {
+      if (location !== "all") {
         query = query.eq("location", location)
       }
-      if (ranking) {
+      if (ranking !== "all") {
         query = query.lte("ranking", parseInt(ranking))
       }
 
@@ -89,7 +89,7 @@ export default function Institutions() {
             <SelectValue placeholder="Filter by location" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All locations</SelectItem>
+            <SelectItem value="all">All locations</SelectItem>
             <SelectItem value="New York">New York</SelectItem>
             <SelectItem value="London">London</SelectItem>
             <SelectItem value="Paris">Paris</SelectItem>
@@ -102,7 +102,7 @@ export default function Institutions() {
             <SelectValue placeholder="Filter by ranking" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All rankings</SelectItem>
+            <SelectItem value="all">All rankings</SelectItem>
             <SelectItem value="10">Top 10</SelectItem>
             <SelectItem value="50">Top 50</SelectItem>
             <SelectItem value="100">Top 100</SelectItem>
