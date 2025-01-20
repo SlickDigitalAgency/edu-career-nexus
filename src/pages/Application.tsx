@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
+import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -23,14 +24,18 @@ type ApplicationFormData = {
   phone: string;
   education: string;
   experience: string;
-  resume: FileList;
+  resume: FileList | null;
 };
 
 export default function Application() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const form = useForm<ApplicationFormData>();
+  const form = useForm<ApplicationFormData>({
+    defaultValues: {
+      resume: null,
+    },
+  });
 
   const onSubmit = async (data: ApplicationFormData) => {
     try {
@@ -49,7 +54,7 @@ export default function Application() {
       }
 
       // Handle file upload
-      if (data.resume.length > 0) {
+      if (data.resume && data.resume.length > 0) {
         const file = data.resume[0];
         const fileExt = file.name.split('.').pop();
         const fileName = `${user.id}-${Date.now()}.${fileExt}`;
@@ -178,14 +183,17 @@ export default function Application() {
                 <FormField
                   control={form.control}
                   name="resume"
-                  render={({ field: { onChange, ...field } }) => (
+                  render={({ field: { value, onChange, ...field } }) => (
                     <FormItem>
                       <FormLabel>Resume</FormLabel>
                       <FormControl>
                         <Input 
                           type="file" 
                           accept=".pdf,.doc,.docx"
-                          onChange={(e) => onChange(e.target.files)}
+                          onChange={(e) => {
+                            const files = e.target.files;
+                            onChange(files);
+                          }}
                           {...field}
                         />
                       </FormControl>
