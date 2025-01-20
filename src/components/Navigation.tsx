@@ -43,6 +43,7 @@ export function Navigation() {
             <Button variant="ghost" onClick={() => navigate("/about")}>About</Button>
             {user ? (
               <>
+                <Button variant="ghost" onClick={() => navigate("/application")}>Apply</Button>
                 <Button variant="ghost" onClick={() => navigate("/dashboard")}>Dashboard</Button>
                 <Button variant="default" onClick={handleSignOut}>Sign Out</Button>
               </>
@@ -71,6 +72,7 @@ export function Navigation() {
             <Button variant="ghost" className="w-full justify-start" onClick={() => navigate("/about")}>About</Button>
             {user ? (
               <>
+                <Button variant="ghost" className="w-full justify-start" onClick={() => navigate("/application")}>Apply</Button>
                 <Button variant="ghost" className="w-full justify-start" onClick={() => navigate("/dashboard")}>Dashboard</Button>
                 <Button variant="default" className="w-full" onClick={handleSignOut}>Sign Out</Button>
               </>

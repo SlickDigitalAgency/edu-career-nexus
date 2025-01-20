@@ -4,6 +4,7 @@ import Index from "./pages/Index"
 import Auth from "./pages/Auth"
 import Dashboard from "./pages/Dashboard"
 import Institutions from "./pages/Institutions"
+import Application from "./pages/Application"
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Route path="/auth" element={<Auth />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/institutions" element={<Institutions />} />
+        <Route path="/application" element={<Application />} />
       </Routes>
     </Router>
   )
